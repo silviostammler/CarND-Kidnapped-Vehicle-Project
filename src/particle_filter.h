@@ -11,6 +11,7 @@
 
 #include <string>
 #include <vector>
+#include "Eigen/Dense"
 #include "helper_functions.h"
 
 struct Particle {
@@ -63,8 +64,9 @@ class ParticleFilter {
    * @param predicted Vector of predicted landmark observations
    * @param observations Vector of landmark observations
    */
-  void dataAssociation(std::vector<LandmarkObs> predicted, 
-                       std::vector<LandmarkObs>& observations);
+  void dataAssociation(Particle& particle,
+											 Map& map_landmarks, 
+                       LandmarkObs& observation);
   
   /**
    * updateWeights Updates the weights for each particle based on the likelihood
@@ -108,6 +110,19 @@ class ParticleFilter {
   std::string getAssociations(Particle best);
   std::string getSenseCoord(Particle best, std::string coord);
 
+	/**
+	 * Used for sampling data from a normal (Gaussian) distribution
+		 Each component of the state vector is sampled from an independent distribution
+	 */
+	void addGaussianNoise(Particle& particle,	double x, double y,
+												double theta, double std[]);
+
+	/**
+	 * Calculate the weight for a given observation/landmark pair from a multivariate Gaussian.
+	 */
+	double multiv_prob(double sig_x, double sig_y, double x_obs, double y_obs,
+                   double mu_x, double mu_y);
+
   // Set of current particles
   std::vector<Particle> particles;
 
@@ -120,6 +135,8 @@ class ParticleFilter {
   
   // Vector of weights of all particles
   std::vector<double> weights; 
+
+
 };
 
 #endif  // PARTICLE_FILTER_H_
